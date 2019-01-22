@@ -16,12 +16,13 @@ class VMC:
         self.tol        = tol
         
     def SetSystem(self, Interaction=True, Potential="HarmonicOscillator", Sampling="BruteForce", \
-                  Optimizer="GradientDescent"):
+                  Optimizer="GradientDescent", Elements=["Gauss", "PadeJastrow"]):
         '''Set System'''
         self.Interaction = Interaction
         self.Potential   = Potential
         self.Sampling    = Sampling
         self.Optimizer   = Optimizer
+        self.Elements    = Elements
         
     def SetVariables(self, a=1.0, b=1.0, x='normal'):
         '''Set variables'''
@@ -36,10 +37,10 @@ class VMC:
         self.b = b                               # Initialize Pade-Jastrow parameter
         # Declare objects
         from LocalEnergy import LocalEnergy
-        self.EL  = LocalEnergy(self.N, self.D, self.w, self.Potential, self.Interaction)
-        self.Met = Metropolis(self.N, self.D, self.w, self.dx, self.Sampling)
-        self.Opt  = Optimization(self.N, self.D, self.MC, self.w, self.eta, self.Optimizer)
-        self.WF = WaveFunction(self.N, self.D, self.w)
+        self.EL  = LocalEnergy(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
+        self.Met = Metropolis(self.N, self.D, self.w, self.dx, self.Sampling, self.Elements)
+        self.Opt = Optimization(self.N, self.D, self.MC, self.w, self.eta, self.Optimizer)
+        self.WF  = WaveFunction(self.N, self.D, self.w, self.Elements)
         
     def Iterator(self):
         ''' Parameter update '''

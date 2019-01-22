@@ -1,44 +1,46 @@
 import numpy as np
 
 class WaveFunction:
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
         self.N = N
         self.D = D
         self.w = w
+        self.Elements = self.ExtractElements(Elements)
         
     def __call__(self, a, b, r, R):
         '''Calculate total wave function'''
-        # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w),
-                   PadeJastrow(self.N, self.D, self.w)]
         TotalWF = 1
-        for obj in objects:
+        for element in self.Elements:
+            obj = eval(element)
             TotalWF *= obj.WF(a, b, r, R)      
         return TotalWF*TotalWF
         
     def KineticEnergy(self, a, b, r, R):
         '''Calculate local kinetic energy'''
         # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w),
-                   PadeJastrow(self.N, self.D, self.w)]
+        objects = [Gauss(self.N, self.D, self.w, self.Elements),
+                   PadeJastrow(self.N, self.D, self.w, self.Elements)]
         TotalEnergy = 0
         for k in range(self.N):
             Energy_k = 0
-            for obj in objects:
+            for element in self.Elements:
+                obj = eval(element)
                 Energy_k += obj.FirstDer(a, b, r, R, k)
             TotalEnergy += Energy_k * Energy_k
-        for obj in objects:
+        for element in self.Elements:
+            obj = eval(element)
             TotalEnergy += obj.SecondDer(a, b, r, R)
         return TotalEnergy
         
     def Gradient(self, a, b, r, R):
         '''Calculate derivatives used in optimization'''
         # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w),
-                   PadeJastrow(self.N, self.D, self.w)]
+        objects = [Gauss(self.N, self.D, self.w, self.Elements),
+                   PadeJastrow(self.N, self.D, self.w, self.Elements)]
         Energy = 0
-        for obj in objects:
+        for element in self.Elements:
+            obj = eval(element)
             for k in range(self.N):
                 Energy += obj.FirstDer(a, b, r, R, k)
         gradients = []
@@ -46,11 +48,23 @@ class WaveFunction:
             gradients.append(obj.NablaSecond(a, b, r, R) + 2*Energy*obj.NablaFirst(a, b, r, R))
         return np.array(gradients)
         
+    def ExtractElements(self, Elements):
+        ''' '''
+        Objects = []
+        for i in range(len(Elements)):
+            if Elements[i] == "Gauss":
+                Objects.append("Gauss(self.N, self.D, self.w, self.Elements)")
+            elif Elements[i] == "PadeJastrow":
+                Objects.append("PadeJastrow(self.N, self.D, self.w, self.Elements)")
+            else:
+                Objects.append(Elements[i])
+        return Objects
+        
 
 class Gauss(WaveFunction):
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
-        WaveFunction.__init__(self, N, D, w)
+        WaveFunction.__init__(self, N, D, w, Elements)
 
     def WF(self, a, b, r, R):
         '''Gaussian function'''
@@ -74,9 +88,9 @@ class Gauss(WaveFunction):
         
         
 class PadeJastrow(WaveFunction):
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
-        WaveFunction.__init__(self, N, D, w)
+        WaveFunction.__init__(self, N, D, w, Elements)
         
     def WF(self, a, b, r, R):
         '''Pade-Jastrow factor'''
