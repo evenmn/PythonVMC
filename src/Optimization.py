@@ -17,9 +17,9 @@ class Optimization:
         elif self.Optimizer == "ADAM":
             raise NotImplementedError("ADAM has yet to be implemented")
 
-    def GradientDescent(self, EL_avg, da_tot, daE_tot):
+    def GradientDescent(self, EL_avg, grad_tot, gradE_tot):
         '''Gradient descent'''
-        return 2*self.eta*(daE_tot - EL_avg*da_tot)/self.MC;
+        return 2*self.eta*(gradE_tot - EL_avg*grad_tot)/self.MC
         
     
         

@@ -45,10 +45,10 @@ class VMC:
         ''' Parameter update '''
         self.Energies = []
         for iter in range(self.MaxIter):
-            E_tot   = 0         # Counter for total energy
-            E_sqrd  = 0         # Counter for total energy squared
-            da_tot  = 0         # Counter for derivative of a
-            daE_tot = 0         # Counter for derivative of a multiplied with E
+            E_tot   = 0           # Counter for total energy
+            E_sqrd  = 0           # Counter for total energy squared
+            grad_tot  = 0         # Counter for derivative of a
+            gradE_tot = 0         # Counter for derivative of a multiplied with E
             for i in range(self.MC):
                 nRand = np.random.randint(self.N)                   # Next particle to move
                 dRand = np.random.randint(self.D)                   # Direction to move in
@@ -58,11 +58,11 @@ class VMC:
                     self.r = rNew
                     self.R = RNew
                 E  = self.EL(self.a, self.b, self.r, self.R)
-                da = self.WF.Gradient(self.a, self.r)
+                grad = self.WF.Gradient(self.a, self.b, self.r, self.R)
                 E_tot   += E
                 E_sqrd  += E*E
-                da_tot  += da
-                daE_tot += da*E
+                grad_tot  += grad
+                gradE_tot += grad*E
                 
             EL_avg = E_tot/self.MC
             self.Energies.append(EL_avg)
@@ -70,8 +70,7 @@ class VMC:
             
             print("--- Iteration {} ---".format(iter+1))
             print("<E>: ", EL_avg)
-            print("<σ>: ", σ)
-            print(" ")
+            print("<σ>: ", σ, "\n")
             
             if iter > 1 and abs(EL_avg - self.Energies[-2]) < self.tol:
                 print("=== Converged after {} iterations ===".format(iter+1))
@@ -79,7 +78,9 @@ class VMC:
                 print("Final variance: ", σ)
                 break
             
-            self.a -= self.Opt(EL_avg, da_tot, daE_tot)      # Optimization
+            dE = self.Opt(EL_avg, grad_tot, gradE_tot)      # Optimization
+            self.a -= dE[0]
+            #self.b -= dE[1]
         
     def Plotter(self):
         '''Plot energy'''

@@ -13,7 +13,7 @@ class WaveFunction:
         objects = [Gauss(self.N, self.D, self.w)]
         TotalWF = 1
         for obj in objects:
-            TotalWF *= obj.WF(a, r)      
+            TotalWF *= obj.WF(a, b, r, R)      
         return TotalWF*TotalWF
         
     def KineticEnergy(self, a, b, r, R):
@@ -24,21 +24,24 @@ class WaveFunction:
         for k in range(self.N):
             Energy_k = 0
             for obj in objects:
-                Energy_k += obj.FirstDer(a, r, k)
+                Energy_k += obj.FirstDer(a, b, r, R, k)
             TotalEnergy += Energy_k * Energy_k
         for obj in objects:
-            TotalEnergy += obj.SecondDer(a, r)
+            TotalEnergy += obj.SecondDer(a, b, r, R)
         return TotalEnergy
         
-    def Gradient(self, a, r):
+    def Gradient(self, a, b, r, R):
         '''Calculate derivatives used in optimization'''
         # Specify wave function elements
         objects = [Gauss(self.N, self.D, self.w)]
-        
+        Energy = 0
+        for obj in objects:
+            for k in range(self.N):
+                Energy += obj.FirstDer(a, b, r, R, k)
         gradients = []
         for obj in objects:
-            gradients.append(obj.Nabla(a, r))
-        return np.array(gradients)[0]
+            gradients.append(obj.NablaSecond(a, b, r, R)) + 2*Energy*obj.NablaFirst(a, b, r, R))
+        return np.array(gradients)
         
 
 class Gauss(WaveFunction):
@@ -46,21 +49,25 @@ class Gauss(WaveFunction):
         '''Constructor'''
         WaveFunction.__init__(self, N, D, w)
 
-    def WF(self, a, r):
+    def WF(self, a, b, r, R):
         '''Gaussian function'''
         return np.exp(-0.5 * a * np.sum(np.square(r)))
         
-    def FirstDer(self, a, r, k):
-        '''First derivative of ln(WF) with respect to r_k'''
+    def FirstDer(self, a, b, r, R, k):
+        '''∇ln(WF) with respect to r_k'''
         return -a * r[k]
         
-    def SecondDer(self, a, r):
-        '''Second derivative og ln(WF), sum over all r_k's'''
+    def SecondDer(self, a, b, r, R):
+        '''∇²ln(WF), sum over all r_k's'''
         return -a * self.N * self.D
         
-    def Nabla(self, a, r):
-        '''Derivative of energy with respect to a'''
-        return 3*self.N - 4*a*a*np.sum(np.square(r))
+    def NablaFirst(self, a, b, r, R):
+        '''Derivative of ∇ln(WF) with respect to a'''
+        return -2*a*r.sum()
+        
+    def NablaSecond(self, a, b, r, R):
+        '''Derivative of ∇²ln(WF) with respect to a'''
+        return -self.D*self.N 
         
         
 class PadeJastrow(WaveFunction):
@@ -68,16 +75,41 @@ class PadeJastrow(WaveFunction):
         '''Constructor'''
         WaveFunction.__init__(self, N, D, w)
         
-    def WF(self, b, R):
+    def WF(self, a, b, r, R):
         '''Pade-Jastrow factor'''
+        counter = 0
         for i in range(self.N):
             for j in range(i):
-                return R(i,j)/(1 + b * R(i,j))
+                counter += R[i,j]/(1 + b * R[i,j])
+        return counter
                 
-    def FirstDer(self, a, r, k):
-        '''First derivative of ln(WF) with respect to r_k'''
-        return 1
+    def FirstDer(self, a, b, r, R, k):
+        '''∇ln(WF) with respect to r_k'''
+        counter = 0
+        for j in range(k):
+            counter += 1/(1 + b * R[k,j])**2
+        return counter
         
-    def SecondDer(self, a, r, k):
-        '''Second derivative og ln(WF), sum over all r_k's'''
-        return 1
+    def SecondDer(self, a, b, r, R):
+        '''∇²ln(WF), sum over all r_k's'''
+        counter = 0
+        for k in range(self.N):
+            for j in range(k):
+                counter -= 2 * b/(1 + b * R[k,j])**3
+        return counter
+        
+    def NablaFirst(self, a, b, r, R):
+        '''Derivative of ∇ln(WF) with respect to b'''
+        counter = 0
+        for k in range(self.N):
+            for j in range(k):
+                counter -= 2*R[k,j]/(1 + b * R[k,j])**3
+        return counter
+        
+    def NablaSecond(self, a, b, r, R):
+        '''Derivative of ∇²ln(WF) with respect to b'''
+        counter = 0
+        for k in range(self.N):
+            for j in range(k):
+                counter -= (2*R[k,j]/(1+b*R[k,j])**3)*((1-2*b*R[k,j])/(1+b*R[k,j]))
+        return counter
