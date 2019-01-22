@@ -10,10 +10,10 @@ class Optimization:
         self.eta = eta
         self.Optimizer = Optimizer
         
-    def __call__(self, EL_avg, da_tot, daE_tot):
+    def __call__(self, EL_avg, grad_tot, gradE_tot):
         '''Returns correlation term'''
         if self.Optimizer == "GradientDescent":
-            return self.GradientDescent(EL_avg, da_tot, daE_tot)
+            return self.GradientDescent(EL_avg, grad_tot, gradE_tot)
         elif self.Optimizer == "ADAM":
             raise NotImplementedError("ADAM has yet to be implemented")
 

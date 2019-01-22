@@ -10,7 +10,8 @@ class WaveFunction:
     def __call__(self, a, b, r, R):
         '''Calculate total wave function'''
         # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w)]
+        objects = [Gauss(self.N, self.D, self.w),
+                   PadeJastrow(self.N, self.D, self.w)]
         TotalWF = 1
         for obj in objects:
             TotalWF *= obj.WF(a, b, r, R)      
@@ -19,7 +20,8 @@ class WaveFunction:
     def KineticEnergy(self, a, b, r, R):
         '''Calculate local kinetic energy'''
         # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w)]
+        objects = [Gauss(self.N, self.D, self.w),
+                   PadeJastrow(self.N, self.D, self.w)]
         TotalEnergy = 0
         for k in range(self.N):
             Energy_k = 0
@@ -33,14 +35,15 @@ class WaveFunction:
     def Gradient(self, a, b, r, R):
         '''Calculate derivatives used in optimization'''
         # Specify wave function elements
-        objects = [Gauss(self.N, self.D, self.w)]
+        objects = [Gauss(self.N, self.D, self.w),
+                   PadeJastrow(self.N, self.D, self.w)]
         Energy = 0
         for obj in objects:
             for k in range(self.N):
                 Energy += obj.FirstDer(a, b, r, R, k)
         gradients = []
         for obj in objects:
-            gradients.append(obj.NablaSecond(a, b, r, R)) + 2*Energy*obj.NablaFirst(a, b, r, R))
+            gradients.append(obj.NablaSecond(a, b, r, R) + 2*Energy*obj.NablaFirst(a, b, r, R))
         return np.array(gradients)
         
 
@@ -63,11 +66,11 @@ class Gauss(WaveFunction):
         
     def NablaFirst(self, a, b, r, R):
         '''Derivative of ∇ln(WF) with respect to a'''
-        return -2*a*r.sum()
+        return 0.5 * r.sum()
         
     def NablaSecond(self, a, b, r, R):
         '''Derivative of ∇²ln(WF) with respect to a'''
-        return -self.D*self.N 
+        return 0.5 * self.N * self.D 
         
         
 class PadeJastrow(WaveFunction):
@@ -103,7 +106,7 @@ class PadeJastrow(WaveFunction):
         counter = 0
         for k in range(self.N):
             for j in range(k):
-                counter -= 2*R[k,j]/(1 + b * R[k,j])**3
+                counter += R[k,j]/(1 + b * R[k,j])**3
         return counter
         
     def NablaSecond(self, a, b, r, R):
@@ -111,5 +114,5 @@ class PadeJastrow(WaveFunction):
         counter = 0
         for k in range(self.N):
             for j in range(k):
-                counter -= (2*R[k,j]/(1+b*R[k,j])**3)*((1-2*b*R[k,j])/(1+b*R[k,j]))
+                counter += (R[k,j]/(1+b*R[k,j])**3)*((1-2*b*R[k,j])/(1+b*R[k,j]))
         return counter

@@ -66,7 +66,7 @@ class VMC:
                 
             EL_avg = E_tot/self.MC
             self.Energies.append(EL_avg)
-            σ = (E_sqrd/self.MC - EL_avg*EL_avg)/self.MC
+            σ = np.sqrt(E_sqrd/self.MC - EL_avg*EL_avg)
             
             print("--- Iteration {} ---".format(iter+1))
             print("<E>: ", EL_avg)
@@ -80,7 +80,7 @@ class VMC:
             
             dE = self.Opt(EL_avg, grad_tot, gradE_tot)      # Optimization
             self.a -= dE[0]
-            #self.b -= dE[1]
+            self.b -= dE[1]
         
     def Plotter(self):
         '''Plot energy'''
