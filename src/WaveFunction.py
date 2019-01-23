@@ -6,14 +6,18 @@ class WaveFunction:
         self.N = N
         self.D = D
         self.w = w
+        Elements = ["Gauss", "PadeJastrow"]
+        self.Elements = self.ExtractElements(Elements)
         
     def __call__(self, a, b, r, R):
         '''Calculate total wave function'''
         # Specify wave function elements
         objects = [Gauss(self.N, self.D, self.w),
                    PadeJastrow(self.N, self.D, self.w)]
+        #objects = 
         TotalWF = 1
-        for obj in objects:
+        for obj in self.Elements:
+            obj = eval(obj)
             TotalWF *= obj.WF(a, b, r, R)      
         return TotalWF*TotalWF
         
@@ -25,10 +29,12 @@ class WaveFunction:
         TotalEnergy = 0
         for k in range(self.N):
             Energy_k = 0
-            for obj in objects:
+            for obj in self.Elements:
+                obj = eval(obj)
                 Energy_k += obj.FirstDer(a, b, r, R, k)
             TotalEnergy += Energy_k * Energy_k
-        for obj in objects:
+        for obj in self.Elements:
+            obj = eval(obj)
             TotalEnergy += obj.SecondDer(a, b, r, R)
         return TotalEnergy
         
@@ -38,13 +44,27 @@ class WaveFunction:
         objects = [Gauss(self.N, self.D, self.w),
                    PadeJastrow(self.N, self.D, self.w)]
         Energy = 0
-        for obj in objects:
+        for obj in self.Elements:
+            obj = eval(obj)
             for k in range(self.N):
                 Energy += obj.FirstDer(a, b, r, R, k)
         gradients = []
-        for obj in objects:
+        for obj in self.Elements:
+            obj = eval(obj)
             gradients.append(obj.NablaSecond(a, b, r, R) + 2*Energy*obj.NablaFirst(a, b, r, R))
         return np.array(gradients)
+        
+    def ExtractElements(self, Elements):
+        '''Transform list of elements to list of functions'''
+        Objects = []
+        for i in range(len(Elements)):
+            if Elements[i] == "Gauss":
+                Objects.append("Gauss(self.N, self.D, self.w, self.Elements)")
+            elif Elements[i] == "PadeJastrow":
+                Objects.append("PadeJastrow(self.N, self.D, self.w, self.Elements)")
+            else:
+                Objects.append(Elements[i])
+        return Objects
         
 
 class Gauss(WaveFunction):
