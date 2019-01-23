@@ -2,7 +2,6 @@ import numpy as np
 from Optimization import *
 from Metropolis import *
 
-
 class VMC:
     def __init__(self, N, D, MC, MaxIter, w, dx, eta, tol):
         '''Constructor'''
@@ -23,7 +22,7 @@ class VMC:
         self.Sampling    = Sampling
         self.Optimizer   = Optimizer
         
-    def SetVariables(self, a=1.0, b=1.0, x='normal'):
+    def SetVariables(self, a=1.0, b=1.0, c=1.0, x='normal'):
         '''Set variables'''
         # Initialize positions
         if x == 'uniform':
@@ -34,6 +33,7 @@ class VMC:
         self.r = np.zeros(self.N)                          # Initialize ri
         self.a = a                               # Initialize gaussian parameter
         self.b = b                               # Initialize Pade-Jastrow parameter
+        self.c = c
         # Declare objects
         from LocalEnergy import LocalEnergy
         self.EL  = LocalEnergy(self.N, self.D, self.w, self.Potential, self.Interaction)
@@ -52,13 +52,13 @@ class VMC:
             for i in range(self.MC):
                 nRand = np.random.randint(self.N)                   # Next particle to move
                 dRand = np.random.randint(self.D)                   # Direction to move in
-                xNew, rNew, RNew, PsiRatio = self.Met(self.x, self.r, self.R, self.a, self.b, nRand, dRand)      # Metropolis
+                xNew, rNew, RNew, PsiRatio = self.Met(self.x, self.r, self.R, self.a, self.b, self.c, nRand, dRand)      # Metropolis
                 if(PsiRatio >= np.random.rand(1)):
                     self.x = xNew
                     self.r = rNew
                     self.R = RNew
-                E  = self.EL(self.a, self.b, self.r, self.R)
-                grad = self.WF.Gradient(self.a, self.b, self.r, self.R)
+                E  = self.EL(self.a, self.b, self.c, self.r, self.R)
+                grad = self.WF.Gradient(self.a, self.b, self.c, self.r, self.R)
                 E_tot   += E
                 E_sqrd  += E*E
                 grad_tot  += grad
@@ -81,6 +81,7 @@ class VMC:
             dE = self.Opt(EL_avg, grad_tot, gradE_tot)      # Optimization
             self.a -= dE[0]
             self.b -= dE[1]
+            #self.c -= dE[2]
         
     def Plotter(self):
         '''Plot energy'''

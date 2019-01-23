@@ -11,12 +11,12 @@ class LocalEnergy(VMC):
         self.Potential = Potential
         self.Interaction = Interaction
         
-    def __call__(self, a, b, r, R):
+    def __call__(self, a, b, c, r, R):
         '''Total local energy'''
         Pot = Potential(self.N, self.D, self.w, self.Potential, self.Interaction)
         Int = Interaction(self.N, self.D, self.w, self.Potential, self.Interaction)
         Kin = Kinetic(self.N, self.D, self.w, self.Potential, self.Interaction)
-        return Kin(a, b, r, R) + Pot(r) + Int(R)
+        return Kin(a, b, c, r, R) + Pot(r) + Int(R)
     
     
 class Kinetic(LocalEnergy):
@@ -24,16 +24,16 @@ class Kinetic(LocalEnergy):
         '''Constructor'''
         LocalEnergy.__init__(self, N, D, w, Potential, Interaction)
         
-    def __call__(self, a, b, r, R):
+    def __call__(self, a, b, c, r, R):
         '''Total kinetic energy of system'''
         system = 0
         if system == 0:
-            return self.Laplacian(a, b, r, R)
+            return self.Laplacian(a, b, c, r, R)
             
-    def Laplacian(self, a, b, r, R):
+    def Laplacian(self, a, b, c, r, R):
         '''Laplace operator'''
         WF = WaveFunction(self.N, self.D, self.w)
-        return -0.5 * WF.KineticEnergy(a, b, r, R)
+        return -0.5 * WF.KineticEnergy(a, b, c, r, R)
         
         
 class Potential(LocalEnergy):
@@ -54,7 +54,7 @@ class Potential(LocalEnergy):
         
     def AtomicNucleus(self, r):
         '''Atomic potential'''
-        return 0.5 * self.w * self.w * np.reciprocal(R).sum()
+        return -0.5 * self.w * self.w * np.reciprocal(r).sum()
     
     
 class Interaction(LocalEnergy):

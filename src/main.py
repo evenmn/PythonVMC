@@ -21,10 +21,10 @@ from MonteCarlo import *
 FermionsInHO = VMC(N        = 2, 
                    D        = 2, 
                    MC       = 100000, 
-                   MaxIter  = 30, 
+                   MaxIter  = 100, 
                    w        = 1, 
                    dx       = 0.1, 
-                   eta      = 0.05,
+                   eta      = 0.01,
                    tol      = 1e-4)
 
 FermionsInHO.SetSystem(Interaction = True, 
@@ -32,6 +32,6 @@ FermionsInHO.SetSystem(Interaction = True,
                        Sampling    = "BruteForce",
                        Optimizer   = "GradientDescent")
 
-FermionsInHO.SetVariables(a=2)
+FermionsInHO.SetVariables(a=2, b=1, c=1)
 FermionsInHO.Iterator()
 FermionsInHO.Plotter()
