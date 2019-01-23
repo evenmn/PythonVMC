@@ -3,26 +3,27 @@ from MonteCarlo import VMC
 from WaveFunction import *
 
 class LocalEnergy(VMC):
-    def __init__(self, N, D, w, Potential, Interaction):
+    def __init__(self, N, D, w, Potential, Interaction, Elements):
         '''Constructor'''
         self.N = N
         self.D = D
         self.w = w
         self.Potential = Potential
         self.Interaction = Interaction
+        self.Elements = Elements
         
     def __call__(self, a, b, c, r, R):
         '''Total local energy'''
-        Pot = Potential(self.N, self.D, self.w, self.Potential, self.Interaction)
-        Int = Interaction(self.N, self.D, self.w, self.Potential, self.Interaction)
-        Kin = Kinetic(self.N, self.D, self.w, self.Potential, self.Interaction)
+        Pot = Potential(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
+        Int = Interaction(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
+        Kin = Kinetic(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
         return Kin(a, b, c, r, R) + Pot(r) + Int(R)
     
     
 class Kinetic(LocalEnergy):
-    def __init__(self, N, D, w, Potential, Interaction):
+    def __init__(self, N, D, w, Potential, Interaction, Elements):
         '''Constructor'''
-        LocalEnergy.__init__(self, N, D, w, Potential, Interaction)
+        LocalEnergy.__init__(self, N, D, w, Potential, Interaction, Elements)
         
     def __call__(self, a, b, c, r, R):
         '''Total kinetic energy of system'''
@@ -32,14 +33,14 @@ class Kinetic(LocalEnergy):
             
     def Laplacian(self, a, b, c, r, R):
         '''Laplace operator'''
-        WF = WaveFunction(self.N, self.D, self.w)
+        WF = WaveFunction(self.N, self.D, self.w, self.Elements)
         return -0.5 * WF.KineticEnergy(a, b, c, r, R)
         
         
 class Potential(LocalEnergy):
-    def __init__(self, N, D, w, Potential, Interaction):
+    def __init__(self, N, D, w, Potential, Interaction, Elements):
         '''Constructor'''
-        LocalEnergy.__init__(self, N, D, w, Potential, Interaction)
+        LocalEnergy.__init__(self, N, D, w, Potential, Interaction, Elements)
         
     def __call__(self, r):
         '''Total external potential of system'''
@@ -58,9 +59,9 @@ class Potential(LocalEnergy):
     
     
 class Interaction(LocalEnergy):
-    def __init__(self, N, D, w, Potential, Interaction):
+    def __init__(self, N, D, w, Potential, Interaction, Elements):
         '''Constructor'''
-        LocalEnergy.__init__(self, N, D, w, Potential, Interaction)
+        LocalEnergy.__init__(self, N, D, w, Potential, Interaction, Elements)
         
     def __call__(self, R):
         '''Total interaction energy of system'''

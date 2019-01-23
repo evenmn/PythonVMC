@@ -2,14 +2,14 @@ import numpy as np
 from WaveFunction import *
 
 class Metropolis:
-    def __init__(self, N, D, w, dx, Sampling):
+    def __init__(self, N, D, w, dx, Sampling, Elements):
         '''Constructor'''
         self.N = N
         self.D = D
         self.w = w
         self.dx = dx 
         self.Sampling = Sampling
-        self.Psi = WaveFunction(N, D, w)
+        self.Psi = WaveFunction(N, D, w, Elements)
         
     def __call__(self, x, r, R, a, b, c, nRand, dRand):
         '''Updates position and PsiRatio'''

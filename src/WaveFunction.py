@@ -1,19 +1,18 @@
 import numpy as np
 
 class WaveFunction:
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
         self.N = N
         self.D = D
         self.w = w
-        Elements = ["Gauss", "PadeJastrow"]
         self.Elements = self.ExtractElements(Elements)
         
     def __call__(self, a, b, c, r, R):
         '''Calculate total wave function'''
         TotalWF = 1
-        for obj in self.Elements:
-            obj = eval(obj)
+        for element in self.Elements:
+            obj = eval(element)
             TotalWF *= obj.WF(a, b, c, r, R)      
         return TotalWF*TotalWF
         
@@ -22,20 +21,20 @@ class WaveFunction:
         TotalEnergy = 0
         for k in range(self.N):
             Energy_k = 0
-            for obj in self.Elements:
-                obj = eval(obj)
+            for element in self.Elements:
+                obj = eval(element)
                 Energy_k += obj.FirstDer(a, b, c, r, R, k)
             TotalEnergy += Energy_k * Energy_k
-        for obj in self.Elements:
-            obj = eval(obj)
+        for element in self.Elements:
+            obj = eval(element)
             TotalEnergy += obj.SecondDer(a, b, c, r, R)
         return TotalEnergy
         
     def Gradient(self, a, b, c, r, R):
         '''Calculate derivatives used in optimization'''
         Energy = 0
-        for obj in self.Elements:
-            obj = eval(obj)
+        for element in self.Elements:
+            obj = eval(element)
             for k in range(self.N):
                 Energy += obj.FirstDer(a, b, c, r, R, k)
         gradients = []
@@ -49,20 +48,20 @@ class WaveFunction:
         Objects = []
         for i in range(len(Elements)):
             if Elements[i] == "Gauss":
-                Objects.append("Gauss(self.N, self.D, self.w)")
+                Objects.append("Gauss(self.N, self.D, self.w, self.Elements)")
             elif Elements[i] == "PadeJastrow":
-                Objects.append("PadeJastrow(self.N, self.D, self.w)")
+                Objects.append("PadeJastrow(self.N, self.D, self.w, self.Elements)")
             elif Elements[i] == "HydrogenLike":
-                Objects.append("HydrogenLike(self.N, self.D, self.w)")
+                Objects.append("HydrogenLike(self.N, self.D, self.w, self.Elements)")
             else:
                 Objects.append(Elements[i])
         return Objects
         
 
 class Gauss(WaveFunction):
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
-        WaveFunction.__init__(self, N, D, w)
+        WaveFunction.__init__(self, N, D, w, Elements)
 
     def WF(self, a, b, c, r, R):
         '''Gaussian function'''
@@ -86,9 +85,9 @@ class Gauss(WaveFunction):
         
         
 class PadeJastrow(WaveFunction):
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
-        WaveFunction.__init__(self, N, D, w)
+        WaveFunction.__init__(self, N, D, w, Elements)
         
     def WF(self, a, b, c, r, R):
         '''Pade-Jastrow factor'''

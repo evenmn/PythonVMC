@@ -20,17 +20,18 @@ from MonteCarlo import *
 
 FermionsInHO = VMC(N        = 2, 
                    D        = 2, 
-                   MC       = 100000, 
+                   MC       = 10000, 
                    MaxIter  = 100, 
                    w        = 1, 
                    dx       = 0.1, 
                    eta      = 0.01,
                    tol      = 1e-4)
 
-FermionsInHO.SetSystem(Interaction = True, 
+FermionsInHO.SetSystem(Interaction = False, 
                        Potential   = "HarmonicOscillator", 
                        Sampling    = "BruteForce",
-                       Optimizer   = "GradientDescent")
+                       Optimizer   = "GradientDescent",
+                       Elements    = ["Gauss"]) #, "PadeJastrow"])
 
 FermionsInHO.SetVariables(a=2, b=1, c=1)
 FermionsInHO.Iterator()
