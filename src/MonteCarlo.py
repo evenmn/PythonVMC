@@ -1,4 +1,5 @@
 import numpy as np
+from time import clock
 from Optimization import *
 from Metropolis import *
 
@@ -23,7 +24,7 @@ class VMC:
         self.Optimizer   = Optimizer
         self.Elements    = Elements
         
-    def SetVariables(self, a=1.0, b=1.0, c=1.0, x='normal'):
+    def SetVariables(self, a=1.0, b=1.0, c=1.0, x='uniform'):
         '''Set variables'''
         # Initialize positions
         if x == 'uniform':
@@ -50,6 +51,7 @@ class VMC:
             E_sqrd  = 0           # Counter for total energy squared
             grad_tot  = 0         # Counter for derivative of a
             gradE_tot = 0         # Counter for derivative of a multiplied with E
+            start = clock()
             for i in range(self.MC):
                 nRand = np.random.randint(self.N)                   # Next particle to move
                 dRand = np.random.randint(self.D)                   # Direction to move in
@@ -64,14 +66,15 @@ class VMC:
                 E_sqrd  += E*E
                 grad_tot  += grad
                 gradE_tot += grad*E
-                
+            end = clock()
             EL_avg = E_tot/self.MC
             self.Energies.append(EL_avg)
             σ = np.sqrt(E_sqrd/self.MC - EL_avg*EL_avg)
             
             print("--- Iteration {} ---".format(iter+1))
-            print("<E>: ", EL_avg)
-            print("<σ>: ", σ, "\n")
+            print("<E>:  ", EL_avg)
+            print("σ:    ", σ)
+            print("Time: ", end - start, "\n")
             
             if iter > 1 and abs(EL_avg - self.Energies[-2]) < self.tol:
                 print("=== Converged after {} iterations ===".format(iter+1))
@@ -81,7 +84,7 @@ class VMC:
             
             dE = self.Opt(EL_avg, grad_tot, gradE_tot)      # Optimization
             self.c -= dE[0]
-            self.b -= dE[1]
+            #self.b -= dE[1]
             #self.c -= dE[2]
         
     def Plotter(self):

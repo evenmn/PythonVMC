@@ -18,21 +18,21 @@ tol:    {float}  Tolerance when deciding convergence
 
 from MonteCarlo import *
 
-FermionsInHO = VMC(N        = 2, 
+FermionsInHO = VMC(N        = 1, 
                    D        = 3, 
-                   MC       = 1000000, 
+                   MC       = 100000, 
                    MaxIter  = 100, 
                    w        = 1, 
                    dx       = 0.1, 
-                   eta      = 0.0001,
+                   eta      = 0.05,
                    tol      = 1e-4)
 
-FermionsInHO.SetSystem(Interaction = True, 
-                       Potential   = "HarmonicOscillator", 
+FermionsInHO.SetSystem(Interaction = False, 
+                       Potential   = "AtomicNucleus", 
                        Sampling    = "BruteForce",
                        Optimizer   = "GradientDescent",
-                       Elements    = ["HydrogenLike", "PadeJastrow"])
+                       Elements    = ["HydrogenLike"]) #, "PadeJastrow"])
 
-FermionsInHO.SetVariables(a=2, b=1, c=1)
+FermionsInHO.SetVariables(a=1, b=1, c=1)
 FermionsInHO.Iterator()
 FermionsInHO.Plotter()
