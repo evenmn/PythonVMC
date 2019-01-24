@@ -80,8 +80,8 @@ class VMC:
                 break
             
             dE = self.Opt(EL_avg, grad_tot, gradE_tot)      # Optimization
-            self.a -= dE[0]
-            #self.b -= dE[1]
+            self.c -= dE[0]
+            self.b -= dE[1]
             #self.c -= dE[2]
         
     def Plotter(self):

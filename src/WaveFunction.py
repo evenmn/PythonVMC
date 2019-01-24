@@ -130,9 +130,9 @@ class PadeJastrow(WaveFunction):
         
         
 class HydrogenLike(WaveFunction):
-    def __init__(self, N, D, w):
+    def __init__(self, N, D, w, Elements):
         '''Constructor'''
-        WaveFunction.__init__(self, N, D, w)
+        WaveFunction.__init__(self, N, D, w, Elements)
         
     def WF(self, a, b, c, r, R):
         '''Hydrogen-like orbitals'''
