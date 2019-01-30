@@ -17,6 +17,13 @@ class LocalEnergy(VMC):
         Pot = Potential(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
         Int = Interaction(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
         Kin = Kinetic(self.N, self.D, self.w, self.Potential, self.Interaction, self.Elements)
+        
+
+        print(Kin(a, b, c, r, R))
+        print(Pot(r))
+        print(Int(R))
+        print(' ')
+        
         return Kin(a, b, c, r, R) + Pot(r) + Int(R)
     
     

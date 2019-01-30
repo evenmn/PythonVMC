@@ -95,7 +95,7 @@ class PadeJastrow(WaveFunction):
         for i in range(self.N):
             for j in range(i):
                 counter += R[i,j]/(1 + b * R[i,j])
-        return counter
+        return np.exp(counter)
                 
     def FirstDer(self, a, b, c, r, R, k):
         '''∇ln(WF) with respect to r_k'''
@@ -109,8 +109,9 @@ class PadeJastrow(WaveFunction):
         counter = 0
         for k in range(self.N):
             for j in range(k):
-                counter -= 2 * b/(1 + b * R[k,j])**3
-        return counter
+                f = 1/(1 + b * R[k,j])
+                counter += (1/(1 + b * R[k,j])**2) * (1/r[k] - b/(1 + b * R[k,j]))
+        return 2 * counter
         
     def NablaFirst(self, a, b, c, r, R):
         '''Derivative of ∇ln(WF) with respect to b'''
